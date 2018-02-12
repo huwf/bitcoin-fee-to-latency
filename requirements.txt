@@ -1,0 +1,4 @@
+pytest
+requests
+pymongo
+git+https://github.com/huwf/blocktrail-sdk-python.git

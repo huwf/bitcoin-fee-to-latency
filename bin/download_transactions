@@ -1,0 +1,3 @@
+#! /bin/bash
+# Should have start or recovery arguments, and an end argument (defaults to datetime.now())
+bitcoin-fee-to-latency/main.py --transactions "$@"

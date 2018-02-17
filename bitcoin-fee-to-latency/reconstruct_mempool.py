@@ -5,6 +5,13 @@ except:
 from pymongo import MongoClient
 from bson.son import SON
 import datetime
+import os
+import logging
+logging.basicConfig(
+        level=os.environ.get('logging', 'INFO'),
+        format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+log = logging.getLogger('__main__')
+
 
 db = MongoClient('mongodb://localhost:27017').bitcoin
 
@@ -22,7 +29,7 @@ def get_all_blocks(max_page=0, offset=0):
         js = client.client.make_api_call(client.client.all_blocks, kwargs=kwargs)
         output = js['data']
         db.blocks.insert_many(output)
-        print(output)
+        logging.debug(output)
         # i += 1
         total = js['total']
         current_page += 1
@@ -30,19 +37,16 @@ def get_all_blocks(max_page=0, offset=0):
     return output
 
 
-def get_blocks_in_period(start_date, end_date, hours_before=4):
+def get_blocks_in_period(start_date, end_date, hours_before=0):
     """    
     :param start_date: A datetime object indicating the earliest period to be searched for.
-      Results will be returned for 4 hours earlier
+      Results will be returned for 4 hours earlier **NOT USED**
     :param end_date: A datetime object specifying the end of the period to be searched for
-    :param hours_before: An int which specifies the housr before the period to search
+    :param hours_before: An int which specifies the hours before the period to search
     :return: A list of transaction IDs
     :rtype list
     """
-    # Take earlier transaction into account, so we can construct mempool at the earliest time
-    start_date = start_date - datetime.timedelta(hours=hours_before)
-    # HACK: Can't get datetime to work, so converting to strings
-    # Dates format is YYYY-MM-DD, so this still works
+    # start_date = start_date - datetime.timedelta(hours=hours_before)
     start_date = datetime.datetime.strftime(start_date, '%Y-%m-%dT%H:%M:%S')
 
     end_date = datetime.datetime.strftime(end_date, '%Y-%m-%dT%H:%M:%S')
@@ -50,9 +54,9 @@ def get_blocks_in_period(start_date, end_date, hours_before=4):
     return list(db.blocks.find(query, {"hash": 1, "block_time": 1, "_id": 0}))
 
 
-def get_transactions_for_period(start_date, end_date, limit=200):
-    for b in get_blocks_in_period(start_date, end_date):
-        print('processing block: %s' % b['hash'])
+def get_transactions_for_period(start_date, end_date, limit=200, recovery=False):
+    for b in get_blocks_in_period(start_date, end_date, recovery):
+        log.info('processing block: %s' % b['hash'])
         current_page = 0
         # Temp value until we find out what it actually is
         total = 99999
@@ -68,7 +72,7 @@ def get_transactions_for_period(start_date, end_date, limit=200):
                 if tran is not None:
                     insert_trans.append(tran)
                 else:
-                    print('tran is None for hash %s' % hash)
+                    log.warning('tran is None for hash %s' % hash)
                     db.nonetypes.insert_one({'hash': hash})
                 # try:
                 #     db.transactions.insert_one(SON(tran))
@@ -78,7 +82,7 @@ def get_transactions_for_period(start_date, end_date, limit=200):
                 try:
                     db.transactions.insert_many(insert_trans, bypass_document_validation=True)
                 except TypeError as err:
-                    print('something went wrong...')
+                    log.exception('something went wrong...', err)
 
 
 def generate_mempool(mempool_time):
@@ -87,7 +91,12 @@ def generate_mempool(mempool_time):
     :param mempool_time: A datetime object that we need the time for.
     :return: 
     '''
+    mempool_time = datetime.datetime.strftime(mempool_time, '%Y-%m-%dT%H:%M:%S')
     query = {
         '$and': [{"first_seen_at": {'$lte': mempool_time}}, {'block_time': {'$gt': mempool_time}}]
     }
-    db.transactions.find(query)
+    return db.transactions.find(query)
+
+
+def generate_mempool_count(mempool_time):
+    return generate_mempool(mempool_time).count()

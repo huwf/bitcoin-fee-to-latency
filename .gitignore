@@ -1,3 +1,6 @@
 bitcoin-fee-to-latency/credentials
 ./db/*
 .idea/
+bitcoin-fee-to-latency/__pycache__/*
+db/
+metrics.interim.temp

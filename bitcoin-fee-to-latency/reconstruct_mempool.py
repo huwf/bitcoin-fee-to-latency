@@ -12,8 +12,8 @@ logging.basicConfig(
         format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 log = logging.getLogger('__main__')
 
-
-db = MongoClient('mongodb://localhost:27017').bitcoin
+db_path = os.environ.get('MONGO_DB', 'mongodb://mongo:27017')
+db= MongoClient(db_path).bitcoin
 
 
 def get_all_blocks(max_page=0, offset=0):
@@ -85,7 +85,7 @@ def get_transactions_for_period(start_date, end_date, limit=200, recovery=False)
                     log.exception('something went wrong...', err)
 
 
-def generate_mempool(mempool_time):
+def generate_mempool(mempool_time, verbose=False):
     '''
     Simulates the mempool at a given time from transactions stored in the database
     :param mempool_time: A datetime object that we need the time for.
@@ -95,7 +95,7 @@ def generate_mempool(mempool_time):
     query = {
         '$and': [{"first_seen_at": {'$lte': mempool_time}}, {'block_time': {'$gt': mempool_time}}]
     }
-    return db.transactions.find(query)
+    return db.transactions.find(query, {'_id': 0, ''})
 
 
 def generate_mempool_count(mempool_time):

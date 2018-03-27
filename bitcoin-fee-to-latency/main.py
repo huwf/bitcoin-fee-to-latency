@@ -9,6 +9,7 @@ import logging
 from datetime import datetime
 import argparse
 from pymongo import MongoClient
+import os
 
 db = MongoClient('mongodb://localhost:27017').bitcoin
 
@@ -27,7 +28,7 @@ parser.add_argument('--reconstruct', help='Set the date to reconstruct the mempo
 args = parser.parse_args()
 
 
-import os
+
 os.environ['logging'] = args.logging
 
 logging.basicConfig(

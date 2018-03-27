@@ -1,6 +1,11 @@
-FROM python:3.5
-ADD . ./bitcoin-fee-to-latency
-WORKDIR ./bitcoin-fee-to-latency
-RUN pip install --no-cache-dir -r requirements.txt
+#FROM python:3.5
+FROM cdecker/bitcoin-dev
+ADD . /bitcoin-fee-to-latency
+WORKDIR /bitcoin-fee-to-latency
+RUN apt-get update
+RUN apt-get install -y python3-pip
+RUN pip3 install -r requirements.txt
 
-#CMD main.py
+ENV BTC_APP_HOME "/bitcoin-fee-to-latency"
+ENV BTC_TIME "2017-12-04T12:00:00"
+

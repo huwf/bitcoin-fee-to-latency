@@ -2,8 +2,12 @@
 try:
     from . import reconstruct_mempool
 except:
+    print('excepting')
     import reconstruct_mempool
-import client
+try:
+    from . import client
+except:
+    import client
 import sys
 import logging
 from datetime import datetime

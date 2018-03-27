@@ -95,7 +95,7 @@ def generate_mempool(mempool_time, verbose=False):
     query = {
         '$and': [{"first_seen_at": {'$lte': mempool_time}}, {'block_time': {'$gt': mempool_time}}]
     }
-    return db.transactions.find(query, {'_id': 0, ''})
+    return db.transactions.find(query, {'_id': 0})
 
 
 def generate_mempool_count(mempool_time):

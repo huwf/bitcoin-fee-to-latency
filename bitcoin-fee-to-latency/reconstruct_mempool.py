@@ -1,7 +1,7 @@
-try:
-    from .client import client
-except:
-    from client import client
+#try:
+#from .client import client
+#except:
+from client import client
 from pymongo import MongoClient
 from bson.son import SON
 import datetime
@@ -95,7 +95,9 @@ def generate_mempool(mempool_time, verbose=False):
     query = {
         '$and': [{"first_seen_at": {'$lte': mempool_time}}, {'block_time': {'$gt': mempool_time}}]
     }
-    return db.transactions.find(query, {'_id': 0})
+    result = db.transactions.find(query, {'_id': 0})
+    print(result)
+    return result
 
 
 def generate_mempool_count(mempool_time):

@@ -54,7 +54,7 @@ if __name__ == '__main__':
         try:
             reconstruct = datetime.strptime(args.reconstruct, '%Y-%m-%dT%H:%M:%S')
             mempool = reconstruct_mempool.generate_mempool(reconstruct)
-            print('Amount of transactions in mempool at %s: %d' % (args.reconstruct, mempool.count()))
+            #print('Amount of transactions in mempool at %s: %d' % (args.reconstruct, mempool.count()))
         except Exception as e:
             log.exception(e)
             log.exception('Date missing, or incorrect date format, should be YYYY-MM-DDTHH:MM:SS')
@@ -85,4 +85,4 @@ if __name__ == '__main__':
 
     #
     # print(len(listy))
-    print('Time taken to run query: ', datetime.now() - start_time)
+#    print('Time taken to run query: ', datetime.now() - start_time)

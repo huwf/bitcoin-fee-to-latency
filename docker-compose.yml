@@ -2,9 +2,12 @@ version: '3'
 services:
   reconstruct_mempool:
     build: .
-#    ports:
-#     - 8332:8332
-#     - 18332:18332
+    tty: true
+    ports:
+     - 8332:8332
+     - 18332:18332
+    volumes:
+     - /home/huw/github/bitcoin:/bitcoin
 
   mongo:
     image: mongo:3.4

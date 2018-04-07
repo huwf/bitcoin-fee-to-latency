@@ -1,13 +1,13 @@
-#!/usr/bin/env python
-try:
-    from . import reconstruct_mempool
-except:
-    print('excepting')
-    import reconstruct_mempool
-try:
-    from . import client
-except:
-    import client
+#!/usr/bin/env python3
+#try:
+#from . import reconstruct_mempool
+#except:
+#    print('excepting')
+import reconstruct_mempool
+#try:
+#    from . import client
+#except:
+import client
 import sys
 import logging
 from datetime import datetime

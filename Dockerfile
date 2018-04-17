@@ -14,4 +14,10 @@ RUN git clone https://github.com/huwf/bitcoin
 WORKDIR /bitcoin
 RUN ./autogen.sh
 RUN ./configure --disable-tests
+
+RUN apt-get install libssl-dev
+RUN apt-get install vim
+RUN pip3 install -e git+https://github.com/petertodd/python-bitcoinlib
+
+
 CMD git pull && /bin/bash

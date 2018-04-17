@@ -8,6 +8,8 @@ services:
      - 18332:18332
     volumes:
      - /home/huw/github/bitcoin:/bitcoin
+     - .:/bitcoin-fee-to-latency
+     - ./bitcoin.conf:/home/developer/.bitcoin/bitcoin.conf
 
   mongo:
     image: mongo:3.4

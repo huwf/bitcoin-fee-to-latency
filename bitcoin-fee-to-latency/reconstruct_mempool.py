@@ -15,18 +15,18 @@ log = logging.getLogger('__main__')
 db_path = os.environ.get('MONGO_DB', 'mongodb://mongo:27017')
 db= MongoClient(db_path).bitcoin
 
-
+import sys
 def get_all_blocks(max_page=0, offset=0):
     current_page = 1 + offset
     per_page = 200
-    total = 999999
+    total = sys.maxsize
     output = []
     while (current_page * per_page) < total:
         if max_page:
             if current_page > max_page:
                 break
         kwargs = {"page": current_page, "limit": per_page}
-        js = client.client.make_api_call(client.client.all_blocks, kwargs=kwargs)
+        js = client.make_api_call(client.all_blocks, kwargs=kwargs)
         output = js['data']
         db.blocks.insert_many(output)
         logging.debug(output)
@@ -52,6 +52,13 @@ def get_blocks_in_period(start_date, end_date, hours_before=0):
     end_date = datetime.datetime.strftime(end_date, '%Y-%m-%dT%H:%M:%S')
     query = {"$and": [{"block_time": {"$gte": start_date}}, {"block_time": {"$lt": end_date}}]}
     return list(db.blocks.find(query, {"hash": 1, "block_time": 1, "_id": 0}))
+
+
+def get_highest_block(end_date):
+    return next(
+        db.blocks.find({"block_time": {"$lte": end_date}}, {'height': 1})
+        .sort({"height": -1}).limit(1)
+    )["height"]
 
 
 def get_transactions_for_period(start_date, end_date, limit=200, recovery=False):

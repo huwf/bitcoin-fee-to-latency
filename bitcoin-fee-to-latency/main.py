@@ -4,6 +4,7 @@
 #except:
 #    print('excepting')
 import reconstruct_mempool
+from blockchain_parser.blockchain import Blockchain
 #try:
 #    from . import client
 #except:
@@ -22,10 +23,10 @@ parser = argparse.ArgumentParser(description='')
 parser.add_argument('--setup', help='Download the blocks for the blockchain', action='store_true')
 parser.add_argument('--transactions', help='Download the transactions for period.  Must have either'
                                            '`start` or `recovery` to work', action='store_true')
-parser.add_argument('--start', help='Datetime in YYYY-MM-DD or YYYY-MM-DD HH:MM:SS format to start analysis')
+parser.add_argument('--start', help='Datetime in YYYY-MM-DD HH:MM:SS format to start analysis')
 parser.add_argument('--recovery', help='If you want to continue from the last transaction date until'
                                        'the end date use this flag', action='store_true')
-parser.add_argument('--end', help='Datetime in YYYY-MM-DD  or YYYY-MM-DD HH:MM:SS format to end analysis',
+parser.add_argument('--end', help='Datetime in YYYY-MM-DD HH:MM:SS format to end analysis',
                     default=datetime.strftime(datetime.now(), '%Y-%m-%dT%H:%M:%S'))
 parser.add_argument('--logging', help='Logging level DEBUG, INFO, WARNING, ERROR', default='INFO')
 parser.add_argument('--reconstruct', help='Set the date to reconstruct the mempool from in YYYY-MM-DDTHH:MM:SS')
@@ -47,14 +48,23 @@ if __name__ == '__main__':
     start_time = datetime.now()
     if args.setup:
         print('args.setup')
-        # reconstruct_mempool.get_all_blocks()
+        reconstruct_mempool.get_all_blocks()
     else:
         pass
     if args.reconstruct:
         try:
-            reconstruct = datetime.strptime(args.reconstruct, '%Y-%m-%dT%H:%M:%S')
-            mempool = reconstruct_mempool.generate_mempool(reconstruct)
-            print('Amount of transactions in mempool at %s: %d' % (args.reconstruct, mempool.count()))
+            end_date = datetime.strptime(args.reconstruct, '%Y-%m-%dT%H:%M:%S')
+            # Identify relevant blocks, up to reconstruct
+            high_block = reconstruct_mempool.get_highest_block(end_date)
+
+            path = os.path.join(os.getcwd(), 'fake_blockchain')
+            blockchain = Blockchain(path)
+
+            blockchain.filter_block_indexes(os.path.join(path, 'index'), end=high_block)
+            blockchain.fake_blockchain()
+
+            # mempool = reconstruct_mempool.generate_mempool(reconstruct)
+            # print('Amount of transactions in mempool at %s: %d' % (args.reconstruct, mempool.count()))
         except Exception as e:
             log.exception(e)
             log.exception('Date missing, or incorrect date format, should be YYYY-MM-DDTHH:MM:SS')

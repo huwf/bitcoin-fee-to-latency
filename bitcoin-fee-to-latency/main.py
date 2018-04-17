@@ -95,4 +95,4 @@ if __name__ == '__main__':
 
     #
     # print(len(listy))
-    print('Time taken to run query: ', datetime.now() - start_time)
+#    print('Time taken to run query: ', datetime.now() - start_time)

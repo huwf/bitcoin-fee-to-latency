@@ -102,8 +102,23 @@ def generate_mempool(mempool_time, verbose=False):
     query = {
         '$and': [{"first_seen_at": {'$lte': mempool_time}}, {'block_time': {'$gt': mempool_time}}]
     }
-    result = db.transactions.find(query, {'_id': 0})
-    print(result)
+    #print(str(query))
+    result = db.transactions.find(query, {'_id': 0, 'hash': 1})
+    #print(result)
+    first = True    
+    i = 0
+    stringy = ''
+    for r in result:
+        i += 1
+        if first:
+            first = False
+        else:
+            pass
+            #stringy += ","
+        print(stringy.rstrip())
+        stringy = '%s' % r['hash']
+        if i > 10:
+            break
     return result
 
 

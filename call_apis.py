@@ -6,12 +6,17 @@ import requests
 from pymongo import MongoClient
 import json
 # import bitcoin
-
+import os
 db = MongoClient('mongodb://127.0.0.1').bitcoin
 
 import logging
-log = logging.getLogger('__name__')
-log.setLevel(logging.DEBUG)
+
+logging.basicConfig(
+        level=os.environ.get('logging', 'INFO'),
+        format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+log = logging.getLogger('__main__')
+
+#log.setLevel(logging.DEBUG)
 
 
 def insert_to_database(js, api):
@@ -25,6 +30,7 @@ def insert_to_database(js, api):
 
 def call_api(url, api):
     try:
+        print('api:', api)
         js = requests.get(url).json()
         # js['service'] = api
         log.info('Successfully called %s at ' % api)
@@ -39,7 +45,7 @@ def call_bitcoinfees_recommended():
 
 
 def call_bitcoinfees_summary():
-    url = ''
+    url = 'https://bitcoinfees.earn.com/api/v1/fees/list'
     return call_api(url, 'bitcoinfees_summary')
 
 
@@ -71,8 +77,12 @@ def call_bitgo_api():
         log.exception('Error calling Bitgo API')
 
 
-def _estimate_smart_fee(i, mode='CONSERVATIVE'):
-    p = Popen(['bitcoin-cli', '-regtest', 'estimatesmartfee', '%d' % i, mode], stdout=PIPE, stderr=PIPE)
+def _estimate_smart_fee(i, mode='CONSERVATIVE', rpc_command='estimatesmartfee'):
+#    if not rpc_command in ['estimatesmartfee', 'estimatefee']:
+#        raise Exception('Can only use this function for estimatefee and estimatesmartfee')
+#    if rpc_command != 'estimatesmartfee':
+#        mode = ''
+    p = Popen(['bitcoin-cli', 'estimatesmartfee', '%d' % i, mode], stdout=PIPE, stderr=PIPE)
     output, err = p.communicate()
     output = output.decode('ascii')
     # print(output, err.decode('ascii'))
@@ -80,8 +90,23 @@ def _estimate_smart_fee(i, mode='CONSERVATIVE'):
     js['time'] = datetime.datetime.now()
     js['mode'] = mode.lower()
     return js
-    insert_to_database(js, 'estimatesmartfee %d' % i)
+#    insert_to_database(js, 'estimatesmartfee %d' % i)
 
+
+def _estimate_fee(i):
+#    if rpc_command != 'estimatesmartfee':
+#        mode = ''
+    p = Popen(['bitcoin-cli', 'estimatefee', '%d' % i], stdout=PIPE, stderr=PIPE)
+    output, err = p.communicate()
+    output = output.decode('ascii')
+    # print(output, err.decode('ascii'))
+    js = {'feerate': output, 'blocks': i}
+#    js = json.loads(output)
+    js['time'] = datetime.datetime.now()
+#    js['api'] = 'estimatefee'
+    js['mode'] = 'estimatefee'
+    return js
+#    insert_to_database(js, 'estimatesmartfee %d' % i)
 
 
 def call_rpc():
@@ -89,13 +114,15 @@ def call_rpc():
         # TODO: Use python-bitcoinlib when they support estimatesmartfee
         # Or,
         # We don't need to check all the way up to 1008
-        # Do the first 20, after which it should tail off (1 causes error)
+        # Do the first 25 (excluding 1), after which it should tail off (1 causes error)
+        # The range for estimatefee is 2 - 25 according to the documentation
         # Then double each time to catch the higher latency transactions
         # js_obj = {}
         js_list = []
-        for i in range(2, 21):
+        for i in range(2, 26):
             js_list.append(_estimate_smart_fee(i))
             js_list.append(_estimate_smart_fee(i, 'ECONOMICAL'))
+            js_list.append(_estimate_fee(i))
         for i in [40, 80, 160, 320, 640, 1008]:
             js_list.append(_estimate_smart_fee(i))
             js_list.append(_estimate_smart_fee(i, 'ECONOMICAL'))
@@ -106,9 +133,11 @@ def call_rpc():
 
 def call_apis():
     try:
-        insert_to_database(call_rpc(), 'estimatesmartfee')
+        insert_to_database(call_rpc(), 'rpc_call')
         insert_to_database(call_bitcoinfees_recommended(), 'bitcoinfees_recommended')
-        insert_to_database(call_bitcoinfees_summary(), 'bitcoinfees_summary')
+        summary = call_bitcoinfees_summary()
+        summary['time'] = datetime.datetime.now()
+        insert_to_database(summary, 'bitcoinfees_summary')
         insert_to_database(call_bitgo_api(), 'bitgo')
     except:
         log.exception('Error with call_apis. This really should be handled somewhere else...')
@@ -119,10 +148,11 @@ if __name__ == '__main__':
     delay = 600
     now = datetime.datetime.now()
     # HACK: want it to start on the hour
-    while now.minute > 0:
-        time.sleep(1)
-    log.info('Application starting at %H:%M' % (now.hour, now.minute))
+#   while datetime.datetime.now().minute > 0:
+#        time.sleep(1)
+    log.info('Application starting: %d:%d' % (datetime.datetime.now().hour, datetime.datetime.now().minute))
     while True:
+#        now = datetime.datetime.now()
         log.info('Calling the local RPC and calling APIs:')
         call_apis()
         time.sleep(delay - ((time.time() - start_time) % delay))

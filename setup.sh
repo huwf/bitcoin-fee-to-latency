@@ -31,5 +31,5 @@ mkdir -p ${ROOT_PATH}/0.15
 cp bitcoin.conf ${SCRIPT_PATH}/blockchain/0.14/bitcoin.conf
 cp bitcoin.conf ${ROOT_PATH}/0.15/bitcoin.conf
 
-docker run -dt --name=bitcoin_0.14 -v -p 8333:8332 -p 18333:18332 ${SCRIPT_PATH}/0.14/:/home/bitcoin/.bitcoin ruimarinho/bitcoin-core:0.14-alpine -prune=4096
-docker run -dt --name=bitcoin_0.15 -v -p 8332:8332 -p 18332:18333 ${ROOT_PATH}/0.15/:/home/bitcoin/.bitcoin ruimarinho/bitcoin-core:0.15-alpine
+docker run -dt --name=bitcoin_0.14 -p 8333:8332 -p 18333:18332 -v ${SCRIPT_PATH}/0.14/:/home/bitcoin/.bitcoin ruimarinho/bitcoin-core:0.14-alpine -testnet -prune=4096
+docker run -dt --name=bitcoin_0.15 -p 8332:8332 -p 18332:18333 -v ${ROOT_PATH}/0.15/:/home/bitcoin/.bitcoin ruimarinho/bitcoin-core:0.15-alpine -testnet -debug

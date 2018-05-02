@@ -124,7 +124,7 @@ def get_time_bucket_start_points():
     #     sort = {'time': 1}
     return db.apis.aggregate([
         {
-            '$match': {'api': 'rpc_call'}
+            '$match': {'api': 'rpc_call', 'data.0.time': {'$gte': datetime.datetime(2018, 4, 24, 10, 24, 11, 300000)}}
         },
         {
             '$sort': {'data.0.time': 1}
@@ -190,7 +190,7 @@ def loop_mempool_entries(cursor):
                         m = _process_bitgo(call['data'], m)
                     elif api == 'rpc_call':
                         m = _process_rpc_call(call['data'], m)
-                    elif api == '':
+                    elif api == 'bitcoinfees_summary':
                         m = _process_bitcoinfees(call['fees'], m)
 
                 writer.writerow(
@@ -205,7 +205,12 @@ def loop_mempool_entries(cursor):
 
 
 def _process_bitcoinfees(data, tx):
-
+    '''
+    This is easier, because it has a range already
+    :param data: 
+    :param tx: 
+    :return: 
+    '''
     ratio = tx['ratio']
     for d in data:
         if ratio >= d['minFee'] and ratio < d['maxFee']:

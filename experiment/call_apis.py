@@ -16,8 +16,6 @@ logging.basicConfig(
         format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 log = logging.getLogger('__main__')
 
-#log.setLevel(logging.DEBUG)
-
 
 def insert_to_database(js, api):
     js['api'] = api

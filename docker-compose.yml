@@ -1,17 +1,42 @@
 version: '3'
 services:
-  reconstruct_mempool:
-    build: .
-    tty: true
+  bitcoin_0.14:
+    name: "bitcoin_0.14"
+    image: ruimarinho/bitcoin-core:0.14-alpine
     ports:
-     - 8332:8332
-     - 18332:18332
+      - 8333:8332
+      - 18333:18332
     volumes:
-     - /home/huw/github/bitcoin:/bitcoin
-     - .:/bitcoin-fee-to-latency
-     - ./bitcoin.conf:/home/developer/.bitcoin/bitcoin.conf
+      - ${ROOT_PATH}/0.14/:/home/bitcoin/.bitcoin
+    command:
+      -printtoconsole
+      -prune=1024
 
-  mongo:
-    image: mongo:3.4
+  bitcoin_0.15:
+    name: "bitcoin_0.15"
+    image: ruimarinho/bitcoin-core:0.15-alpine
+    ports:
+      - 8332:8332
+      - 18332:18332
     volumes:
-     - ./db:/data/db
+      - ${ROOT_PATH}/0.15/:/home/bitcoin/.bitcoin
+    command:
+      -printtoconsole
+
+#  reconstruct_mempool:
+#    build: .
+#    tty: true
+#    ports:
+#     - 8332:8332
+#     - 18332:18332
+#    volumes:
+#     - /home/huw/github/bitcoin:/bitcoin
+#     - .:/bitcoin-fee-to-latency
+#     - ./bitcoin.config:/home/developer/.bitcoin/bitcoin.config
+#
+#
+#  mongo:
+#    image: mongo:3.4
+#    volumes:
+#     - ./db:/data/db
+#     - ./bitcoin-data/bitcoin:/bitcoin

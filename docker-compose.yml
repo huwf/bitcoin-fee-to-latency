@@ -1,42 +1,45 @@
 version: '3'
 services:
   bitcoin_0.14:
-    name: "bitcoin_0.14"
+    container_name: bitcoin_0.14
     image: ruimarinho/bitcoin-core:0.14-alpine
     ports:
-      - 8333:8332
-      - 18333:18332
+      - 8432:8332
+      - 8433:8333
+      - 18432:18332
+      - 18433:18333
     volumes:
-      - ${ROOT_PATH}/0.14/:/home/bitcoin/.bitcoin
-    command:
-      -printtoconsole
-      -prune=1024
+      - ${SCRIPT_PATH}/blockchain/0.14/:/home/bitcoin/.bitcoin
+    command: bitcoind ${TESTNET} -printtoconsole -debug -prune=1024 -reindex
+    depends_on:
+      - bitcoin_0.15
 
   bitcoin_0.15:
-    name: "bitcoin_0.15"
+    container_name: bitcoin_0.15
     image: ruimarinho/bitcoin-core:0.15-alpine
     ports:
       - 8332:8332
+      - 8333:8333
       - 18332:18332
+      - 18333:18333
     volumes:
-      - ${ROOT_PATH}/0.15/:/home/bitcoin/.bitcoin
-    command:
-      -printtoconsole
+      - ${SCRIPT_PATH}/blockchain/0.15/:/home/bitcoin/.bitcoin
+    command: bitcoind ${TESTNET} -printtoconsole -debug
+    depends_on:
+      - mongodb
 
-#  reconstruct_mempool:
-#    build: .
-#    tty: true
-#    ports:
-#     - 8332:8332
-#     - 18332:18332
-#    volumes:
-#     - /home/huw/github/bitcoin:/bitcoin
-#     - .:/bitcoin-fee-to-latency
-#     - ./bitcoin.config:/home/developer/.bitcoin/bitcoin.config
-#
-#
-#  mongo:
-#    image: mongo:3.4
-#    volumes:
-#     - ./db:/data/db
-#     - ./bitcoin-data/bitcoin:/bitcoin
+  experiment:
+    container_name: experiment
+    build: ./experiment
+    volumes:
+     - ./data:/experiment/data
+     - ./bitcoin.conf:/root/.bitcoin/bitcoin.conf
+    environment:
+     - MONGO_DB="mongodb://mongodb:27017"
+
+  mongodb:
+    container_name: mongodb
+    image: mongo:3.4
+    volumes:
+     - ./db:/data/db
+     - ./mongod.conf:/etc/mongod.conf

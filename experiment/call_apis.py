@@ -1,4 +1,5 @@
-#! /usr/bin/python3
+#! /usr/bin/env python
+
 from subprocess import Popen, PIPE
 import time
 import datetime
@@ -7,7 +8,7 @@ from pymongo import MongoClient
 import json
 # import bitcoin
 import os
-db = MongoClient('mongodb://127.0.0.1').bitcoin
+db = MongoClient('mongodb://mongodb').bitcoin
 
 import logging
 
@@ -88,12 +89,9 @@ def _estimate_smart_fee(i, mode='CONSERVATIVE', rpc_command='estimatesmartfee'):
     js['time'] = datetime.datetime.now()
     js['mode'] = mode.lower()
     return js
-#    insert_to_database(js, 'estimatesmartfee %d' % i)
 
 
 def _estimate_fee(i):
-#    if rpc_command != 'estimatesmartfee':
-#        mode = ''
     p = Popen(['bitcoin-cli', 'estimatefee', '%d' % i], stdout=PIPE, stderr=PIPE)
     output, err = p.communicate()
     output = output.decode('ascii')
@@ -130,6 +128,7 @@ def call_rpc():
 
 
 def call_apis():
+
     try:
         insert_to_database(call_rpc(), 'rpc_call')
         insert_to_database(call_bitcoinfees_recommended(), 'bitcoinfees_recommended')

@@ -15,4 +15,4 @@ RUN python -m pip install -r requirements.txt
 
 RUN mkdir /root/.bitcoin
 
-CMD python /experiment/live_tracking.py
+CMD python ./live_tracking.py

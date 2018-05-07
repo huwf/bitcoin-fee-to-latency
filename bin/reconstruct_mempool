@@ -1,2 +1,0 @@
-#! /bin/bash
-$BTC_HOME/bitcoin-fee-to-latency/main.py --reconstruct $1

@@ -81,21 +81,7 @@ mkdir -p ${ROOT_PATH}/0.15
 
 cp bitcoin.conf ${ROOT_PATH}/0.14/bitcoin.conf
 cp bitcoin.conf ${ROOT_PATH}/0.15/bitcoin.conf
-# Hack for the experiment container
-# Needs to have two separate config filess to allow connection to the two different bitcoind instances
-cp bitcoin.conf ${SCRIPT_PATH}/bitcoin.conf.014
-if [[ ${testnet} != '' ]]; then
-    $rpcport=18332
-fi
-echo "rpcconnect=bitcoin_014
-rpcport=${rpcport}" >> bitcoin.conf ${SCRIPT_PATH}/bitcoin.conf.014
-cp bitcoin.conf ${SCRIPT_PATH}/bitcoin.conf.015
 
-if [[ ${testnet} != '' ]]; then
-    $rpcport=18332
-fi
-echo "rpcconnect=bitcoin_015
-rpcport=${rpcport}" >> bitcoin.conf ${SCRIPT_PATH}/bitcoin.conf.015
 
 # This downloads two instances of the blockchain, one for 0.14 and one for 0.15.
 # We will want to use txindex for 0.15 to call getrawtransaction so can't prune

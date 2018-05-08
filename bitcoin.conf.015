@@ -1,0 +1,4 @@
+rpcuser=alice
+rpcpassword=password
+rpcconnect=bitcoin_015
+rpcport=18332

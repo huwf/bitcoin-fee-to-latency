@@ -33,7 +33,8 @@ services:
     build: ./experiment
     volumes:
      - ./data:/experiment/data
-     - ./bitcoin.conf:/root/.bitcoin/bitcoin.conf
+     - ./bitcoin.conf.015:/root/.bitcoin/bitcoin.conf
+     - ./bitcoin.conf.014:/root/.bitcoin/bitcoin.conf.014
     environment:
      - MONGO_DB="mongodb://mongodb:27017"
      - TESTNET=${TESTNET}

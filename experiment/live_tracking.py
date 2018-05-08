@@ -20,7 +20,7 @@ print('db_url: %s' % db_url)
 client = MongoClient('mongodb://mongodb', serverSelectionTimeoutMS=5)
 db = client.bitcoin
 
-node = bitcoin.rpc.Proxy('bitcoin_0.15')
+node = bitcoin.rpc.Proxy('http://bitcoin_0.15')
 if os.environ.get('TESTNET'):
     bitcoin.SelectParams('testnet')
 

@@ -88,11 +88,11 @@ cp bitcoin.conf ${ROOT_PATH}/0.15/bitcoin.conf
 # Internal ports should work as usual without config, but externally map to other ports
 # Since the ports are exposed with EXPOSE in the Dockerfile, docker exec also shouldn't need config
 
-docker run -dt --name=bitcoin_0.14 -p 8432:8332 -p 8433:8333 -p 18432:18332 -p 18433:18333 -v ${SCRIPT_PATH}/0.14/:/home/bitcoin/.bitcoin ruimarinho/bitcoin-core:0.14 \
+docker run -dt --name=bitcoin_014 -p 8432:8332 -p 8433:8333 -p 18432:18332 -p 18433:18333 -v ${SCRIPT_PATH}/0.14/:/home/bitcoin/.bitcoin ruimarinho/bitcoin-core:0.14 \
 bitcoind ${testnet} -prune=${prune} -printtoconsole -debug
 
 # Bitcoin 0.15 is running on the standard ports,so by default RPC queries should go here
-docker run -dt --name=bitcoin_0.15 -p 8333:8333 -p 8332:8332 -p 18333:18333 -p 18332:18332 -v ${ROOT_PATH}/0.15/:/home/bitcoin/.bitcoin ruimarinho/bitcoin-core:0.15 \
+docker run -dt --name=bitcoin_015 -p 8333:8333 -p 8332:8332 -p 18333:18333 -p 18332:18332 -v ${ROOT_PATH}/0.15/:/home/bitcoin/.bitcoin ruimarinho/bitcoin-core:0.15 \
 bitcoind ${testnet} -debug -printtoconsole
 
 # Check for when they are properly synced
@@ -113,9 +113,9 @@ while true ; do
 #    explorer=$(wget -q -O- ${url} | python3 -c "import json; import sys; print(json.load(sys.stdin)['blockcount'])")
     explorer=$(wget -q -O- ${url})
     explorer=${explorer//[ $'\001'-$'\037'[:space:]]/}
-    block_count_014=$(docker exec -it -u bitcoin bitcoin_0.14 bitcoin-cli ${testnet} getblockcount)
+    block_count_014=$(docker exec -it -u bitcoin bitcoin_014 bitcoin-cli ${testnet} getblockcount)
     block_count_014=${block_count_014//[ $'\001'-$'\037'[:space:]]/}
-    block_count_015=$(docker exec -it -u bitcoin bitcoin_0.15 bitcoin-cli ${testnet} getblockcount)
+    block_count_015=$(docker exec -it -u bitcoin bitcoin_015 bitcoin-cli ${testnet} getblockcount)
     block_count_015=${block_count_015//[ $'\001'-$'\037'[:space:]]/}
 
     echo "API: ${explorer}"

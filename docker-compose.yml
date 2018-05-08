@@ -1,7 +1,7 @@
 version: '3'
 services:
-  bitcoin_0.14:
-    container_name: bitcoin_0.14
+  bitcoin_014:
+    container_name: bitcoin_014
     image: ruimarinho/bitcoin-core:0.14-alpine
     ports:
       - 8432:8332
@@ -10,12 +10,12 @@ services:
       - 18433:18333
     volumes:
       - ${SCRIPT_PATH}/blockchain/0.14/:/home/bitcoin/.bitcoin
-    command: bitcoind ${TESTNET} -printtoconsole -debug -prune=1024 -reindex
+    command: ${TESTNET} -printtoconsole -debug -prune=1024 -rpcbind=0.0.0.0
     depends_on:
-      - bitcoin_0.15
+      - bitcoin_015
 
-  bitcoin_0.15:
-    container_name: bitcoin_0.15
+  bitcoin_015:
+    container_name: bitcoin_015
     image: ruimarinho/bitcoin-core:0.15-alpine
     ports:
       - 8332:8332
@@ -24,7 +24,7 @@ services:
       - 18333:18333
     volumes:
       - ${SCRIPT_PATH}/blockchain/0.15/:/home/bitcoin/.bitcoin
-    command: bitcoind ${TESTNET} -printtoconsole -debug
+    command: ${TESTNET} -printtoconsole -debug -rpcbind=0.0.0.0 -rpcallowip=172.16.0.0/12 -rpcallowip=172.17.0.0/16
     depends_on:
       - mongodb
 
@@ -36,7 +36,7 @@ services:
      - ./bitcoin.conf:/root/.bitcoin/bitcoin.conf
     environment:
      - MONGO_DB="mongodb://mongodb:27017"
-
+     - TESTNET=${TESTNET}
   mongodb:
     container_name: mongodb
     image: mongo:3.4
